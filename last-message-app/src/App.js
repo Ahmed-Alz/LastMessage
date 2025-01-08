@@ -1,7 +1,7 @@
-// src/App.js
 import React, { useState } from 'react';
 import './App.css'; // Import the CSS file
 import beaconImage from './assets/beaconImage.png';  // Relative path
+import axios from 'axios';
 
 
 function App() {
@@ -27,17 +27,23 @@ function App() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mock sending data to the backend
-    console.log('User Info:', userInfo);
-    alert('Form submitted!');
+
+    // Send the data to the backend (Flask)
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/start', userInfo);
+      console.log('Backend response:', response.data);
+      alert('Form submitted and timer started!');
+    } catch (error) {
+      console.error('Error sending data to backend:', error);
+      alert('Failed to submit form.');
+    }
   };
 
   return (
     <div className="App">
       <h1>Last Message</h1>
-      {/* <h2>Settings</h2> */}
       <form onSubmit={handleSubmit}>
         <div>
           <label>
