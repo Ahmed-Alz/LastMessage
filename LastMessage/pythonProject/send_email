@@ -1,0 +1,42 @@
+import boto3
+import json
+import time
+
+# Initialize SNS client
+sns_client = boto3.client('sns')
+
+def send_message(recipient, message):
+    """Send a text message using AWS SNS."""
+    response = sns_client.publish(
+        PhoneNumber=recipient,
+        Message=message
+    )
+    print(f"Message sent to {recipient}: {response['MessageId']}")
+
+def process_json(file_path):
+    """Process the JSON file and send notifications based on the status."""
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    
+    status = data.get('status')
+    if status == 'send':
+        recipient = data.get('recipient')
+        message = data.get('message')
+        if recipient and message:
+            send_message(recipient, message)
+        else:
+            print("Error: Missing 'recipient' or 'message' in JSON.")
+    elif status == 'grace':
+        sender = data.get('sender')
+        if sender:
+            warning_message = "Warning: A message send operation is imminent."
+            send_message(sender, warning_message)
+        else:
+            print("Error: Missing 'sender' in JSON.")
+    else:
+        print(f"Unknown status: {status}")
+
+if __name__ == "__main__":
+    # Path to your JSON file
+    json_file_path = "data.json"  # Update with your JSON file path
+    process_json(json_file_path)
