@@ -1,0 +1,62 @@
+ /* src/App.css */
+.App {
+  font-family: 'Courier New', Courier, monospace;
+  margin: 10px;
+  padding: 10px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1 {
+  text-align: center;
+  font-family: 'Zapfino', cursive;
+  margin-bottom: 0px;
+  margin-top: 5px;
+}
+
+h2 {
+  text-align: center;
+  font-family: 'Courier New';
+  font-size: 10px
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin: 10px 0;
+  text-align: center;
+}
+
+input, textarea {
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: 'Courier New', Courier, monospace;
+
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px;
+  font-size: 1.1em;
+  font-family: 'Courier New', 'Courier New', Courier, monospace; 
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #45a049;
+  font-family: 'Courier New', Courier, monospace;
+}
