@@ -7,6 +7,8 @@ class StatusApp:
         self.root = root
         self.time_limit = time_limit  # Total countdown time in seconds
         self.start_time = time.time()
+        self.elapsed_pause = 0
+        self.paused = False
         self.current_image = None
 
         # Load images for statuses
@@ -15,60 +17,96 @@ class StatusApp:
             "yellow": PhotoImage(file="yellow.png"),
             "orange": PhotoImage(file="orange.png"),
             "red": PhotoImage(file="red.png"),
-            "final": PhotoImage(file="final.png")
         }
 
         # Create GUI elements
-        self.label = tk.Label(root)
-        self.label.pack()
+        self.status_label = tk.Label(root, text=f"Time Limit: {self.time_limit} seconds", font=("Arial", 14))
+        self.status_label.pack()
 
-        self.button = tk.Button(root, text="Press Me", command=self.reset_timer)
-        self.button.pack()
+        self.time_label = tk.Label(root, text="Elapsed Time: 0.00 seconds", font=("Arial", 14))
+        self.time_label.pack()
 
-        # Label to show time limit and elapsed time
-        self.info_label = tk.Label(root, text="", font=("Helvetica", 12))
-        self.info_label.pack()
+        self.remaining_label = tk.Label(root, text=f"Time Remaining: {self.time_limit:.2f} seconds", font=("Arial", 14))
+        self.remaining_label.pack()
+
+        self.image_label = tk.Label(root)
+        self.image_label.pack()
+
+        self.button_frame = tk.Frame(root)
+        self.button_frame.pack()
+
+        self.press_button = tk.Button(self.button_frame, text="Press Me", command=self.reset_timer, font=("Arial", 12))
+        self.press_button.pack(side="left", padx=5)
+
+        self.pause_button = tk.Button(self.button_frame, text="Pause", command=self.toggle_pause, font=("Arial", 12))
+        self.pause_button.pack(side="left", padx=5)
+
+        self.reset_button = tk.Button(self.button_frame, text="Reset Timer", command=self.prompt_new_time_limit, font=("Arial", 12))
+        self.reset_button.pack(side="left", padx=5)
 
         # Start the countdown loop
         self.update_status()
 
     def update_status(self):
-        elapsed_time = time.time() - self.start_time
-        percentage_elapsed = elapsed_time / self.time_limit
+        if not self.paused:
+            elapsed_time = time.time() - self.start_time + self.elapsed_pause
+            time_remaining = max(0, self.time_limit - elapsed_time)
+            percentage_elapsed = elapsed_time / self.time_limit
 
-        # Update status image
-        if percentage_elapsed < 0.6:
-            self.set_image("green")
-        elif percentage_elapsed < 0.8:
-            self.set_image("yellow")
-        elif percentage_elapsed < 0.9:
-            self.set_image("orange")
-        elif percentage_elapsed > 0.9 and percentage_elapsed < 1:
-            self.set_image("red")
-        else:
-        	self.set_image("final")
+            # Update the elapsed time label
+            self.time_label.config(text=f"Elapsed Time: {elapsed_time:.2f} seconds")
 
+            # Update the remaining time label
+            self.remaining_label.config(text=f"Time Remaining: {time_remaining:.2f} seconds")
 
-        # Update time information display
-        remaining_time = max(self.time_limit - elapsed_time, 0)
-        self.info_label.config(
-            text=f"Time Limit: {self.time_limit:.1f} seconds\n"
-                 f"Elapsed Time: {elapsed_time:.1f} seconds\n"
-                 f"Remaining Time: {remaining_time:.1f} seconds"
-        )
+            # Determine status based on elapsed percentage
+            if percentage_elapsed < 0.6:
+                self.set_image("green")
+            elif percentage_elapsed < 0.8:
+                self.set_image("yellow")
+            elif percentage_elapsed < 0.9:
+                self.set_image("orange")
+            else:
+                self.set_image("red")
 
-        # Stop updating if the timer exceeds the time limit
-        if elapsed_time < self.time_limit:
-            self.root.after(100, self.update_status)  # Check again after 100 ms
+        # Keep updating unless the timer has expired
+        if not self.paused and elapsed_time < self.time_limit:
+            self.root.after(100, self.update_status)
+        elif self.paused:
+            self.root.after(100, self.update_status)  # Check again after 100 ms if paused
 
     def set_image(self, status):
         if self.current_image != status:
             self.current_image = status
-            self.label.config(image=self.images[status])
+            self.image_label.config(image=self.images[status])
 
     def reset_timer(self):
         self.start_time = time.time()
+        self.elapsed_pause = 0
+        self.paused = False
         self.set_image("green")  # Reset to green immediately
+        self.update_status()
+
+    def toggle_pause(self):
+        if self.paused:
+            # Resume
+            self.start_time = time.time()
+            self.pause_button.config(text="Pause")
+        else:
+            # Pause
+            self.elapsed_pause += time.time() - self.start_time
+            self.pause_button.config(text="Resume")
+        self.paused = not self.paused
+
+    def prompt_new_time_limit(self):
+        new_time_limit = simpledialog.askinteger(
+            "Set Timer", "Enter new countdown time (seconds):", minvalue=1
+        )
+        if new_time_limit is not None:
+            self.time_limit = new_time_limit
+            self.status_label.config(text=f"Time Limit: {self.time_limit} seconds")
+            self.reset_timer()
+
 
 # Create the main application window
 root = tk.Tk()
