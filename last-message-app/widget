@@ -1,0 +1,86 @@
+import tkinter as tk
+from tkinter import PhotoImage, simpledialog
+import time
+
+class StatusApp:
+    def __init__(self, root, time_limit):
+        self.root = root
+        self.time_limit = time_limit  # Total countdown time in seconds
+        self.start_time = time.time()
+        self.current_image = None
+
+        # Load images for statuses
+        self.images = {
+            "green": PhotoImage(file="green.png"),
+            "yellow": PhotoImage(file="yellow.png"),
+            "orange": PhotoImage(file="orange.png"),
+            "red": PhotoImage(file="red.png"),
+            "final": PhotoImage(file="final.png")
+        }
+
+        # Create GUI elements
+        self.label = tk.Label(root)
+        self.label.pack()
+
+        self.button = tk.Button(root, text="Press Me", command=self.reset_timer)
+        self.button.pack()
+
+        # Label to show time limit and elapsed time
+        self.info_label = tk.Label(root, text="", font=("Helvetica", 12))
+        self.info_label.pack()
+
+        # Start the countdown loop
+        self.update_status()
+
+    def update_status(self):
+        elapsed_time = time.time() - self.start_time
+        percentage_elapsed = elapsed_time / self.time_limit
+
+        # Update status image
+        if percentage_elapsed < 0.6:
+            self.set_image("green")
+        elif percentage_elapsed < 0.8:
+            self.set_image("yellow")
+        elif percentage_elapsed < 0.9:
+            self.set_image("orange")
+        elif percentage_elapsed > 0.9 and percentage_elapsed < 1:
+            self.set_image("red")
+        else:
+        	self.set_image("final")
+
+
+        # Update time information display
+        remaining_time = max(self.time_limit - elapsed_time, 0)
+        self.info_label.config(
+            text=f"Time Limit: {self.time_limit:.1f} seconds\n"
+                 f"Elapsed Time: {elapsed_time:.1f} seconds\n"
+                 f"Remaining Time: {remaining_time:.1f} seconds"
+        )
+
+        # Stop updating if the timer exceeds the time limit
+        if elapsed_time < self.time_limit:
+            self.root.after(100, self.update_status)  # Check again after 100 ms
+
+    def set_image(self, status):
+        if self.current_image != status:
+            self.current_image = status
+            self.label.config(image=self.images[status])
+
+    def reset_timer(self):
+        self.start_time = time.time()
+        self.set_image("green")  # Reset to green immediately
+
+# Create the main application window
+root = tk.Tk()
+root.title("Status Indicator")
+
+# Prompt the user for the countdown time limit
+time_limit = simpledialog.askinteger(
+    "Set Timer", "Enter countdown time (seconds):", minvalue=1
+)
+
+if time_limit is not None:
+    app = StatusApp(root, time_limit)
+    root.mainloop()
+else:
+    print("No time limit entered. Exiting.")
