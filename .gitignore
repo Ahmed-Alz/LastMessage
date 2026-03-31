@@ -1,0 +1,25 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+
+# Flask
+instance/
+
+# OS files
+.DS_Store
+
+# Node (React)
+node_modules/
+build/
+
+# Logs
+*.log
