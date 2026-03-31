@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from flask_cors import CORS  # Import Flask-CORS
 import smtplib
@@ -6,16 +8,19 @@ from email.mime.text import MIMEText
 from threading import Timer, Event, Lock
 import time
 
-app = Flask(__name__)
+load_dotenv()
 
-# Enable CORS for all domains or specify which domains are allowed
-CORS(app)  # This will allow all domains, or you can specify with origins=['http://localhost:3000']
+app = Flask(__name__)
+CORS(app)
 
 # SMTP configuration
 smtp_server = "smtp.sendgrid.net"
-smtp_port = 587  # Or use 465 for SSL
-smtp_user = "apikey"  # Always use 'apikey' as the username
-smtp_password = "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"
+smtp_port = 587
+smtp_user = "apikey"
+smtp_password = os.getenv("SENDGRID_API_KEY")
+
+if smtp_password is None:
+    raise ValueError("SENDGRID_API_KEY not set in environment")
 
 # Store timers
 timers = {}
@@ -70,7 +75,7 @@ class CustomTimer:
 def start_timer():
     data = request.get_json()
     label = data.get("username")
-    duration = int(data.get("checkInPeriod", 0)) # * 3600 Convert to seconds
+    duration = int(data.get("checkInPeriod", 0)) # currently passed directly to timer
     user_info = {
         "userEmail": data.get("userEmail"),
         "recipientEmail": data.get("recipientEmail"),
