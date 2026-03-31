@@ -40,7 +40,7 @@ If the user does not check in before the countdown expires, a final message is s
 
 4. On expiration:
 
-   * backend triggers automated outbound message (email/SMS prototype)
+   * backend triggers outbound message (email/SMS prototype)
 
 ---
 
